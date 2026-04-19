@@ -22,3 +22,6 @@ uvicorn app.main:app --reload
 ## Важно
 
 Сейчас email-коды и reset token отдаются в ответе API в debug-полях (для self-hosted разработки без SMTP). Для production замените на отправку почты через SMTP/API провайдера.
+
+
+Пароли хешируются через PBKDF2-HMAC-SHA256 (без зависимости от passlib/bcrypt backend).
