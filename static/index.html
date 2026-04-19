@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SelfHosted Music</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header>
+    <h1>🎧 SelfHosted Music</h1>
+    <div id="userInfo"></div>
+  </header>
+
+  <main>
+    <section class="card" id="authSection">
+      <h2>Авторизация</h2>
+      <input id="email" placeholder="Email" />
+      <input id="password" type="password" placeholder="Пароль" />
+      <input id="displayName" placeholder="Никнейм (для регистрации)" />
+      <div class="row">
+        <button onclick="register()">Регистрация</button>
+        <button onclick="login()">Войти</button>
+      </div>
+
+      <h3>Email-код</h3>
+      <input id="verifyCode" placeholder="Код подтверждения" />
+      <button onclick="verifyEmail()">Подтвердить Email</button>
+
+      <h3>Восстановление пароля</h3>
+      <button onclick="forgotPassword()">Запросить reset token</button>
+      <input id="resetToken" placeholder="Reset token" />
+      <input id="newPassword" type="password" placeholder="Новый пароль" />
+      <button onclick="resetPassword()">Сменить пароль</button>
+      <small>Для self-hosted режима токены/коды возвращаются в API как debug-поля.</small>
+    </section>
+
+    <section class="card hidden" id="uploadSection">
+      <h2>Загрузка трека</h2>
+      <input id="trackTitle" placeholder="Название" />
+      <input id="trackArtist" placeholder="Исполнитель" />
+      <input id="trackFile" type="file" accept="audio/*" />
+      <button onclick="uploadTrack()">Залить музыку</button>
+    </section>
+
+    <section class="card hidden" id="authorsSection">
+      <h2>Авторы</h2>
+      <div id="authorsList"></div>
+    </section>
+
+    <section class="card hidden" id="tracksSection">
+      <h2>Лента треков</h2>
+      <div id="tracks"></div>
+    </section>
+  </main>
+
+  <div id="playerToolbar" class="hidden">
+    <div>
+      <strong id="playingNow">Ничего не играет</strong>
+    </div>
+    <audio id="audioPlayer" controls></audio>
+  </div>
+
+  <div id="toast"></div>
+
+  <script src="/app.js"></script>
+</body>
+</html>

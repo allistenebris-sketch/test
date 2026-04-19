@@ -1,0 +1,109 @@
+:root {
+  color-scheme: dark;
+  --bg: #111827;
+  --panel: #1f2937;
+  --panel-2: #374151;
+  --accent: #22d3ee;
+  --text: #f9fafb;
+}
+
+* { box-sizing: border-box; font-family: Inter, system-ui, sans-serif; }
+body {
+  margin: 0;
+  background: radial-gradient(circle at top right, #1f2937, #030712 60%);
+  color: var(--text);
+  padding-bottom: 120px;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  border-bottom: 1px solid #334155;
+  backdrop-filter: blur(4px);
+  position: sticky;
+  top: 0;
+  background: #0b1224aa;
+}
+
+main {
+  max-width: 1100px;
+  margin: 20px auto;
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  padding: 0 16px;
+}
+
+.card {
+  background: linear-gradient(180deg, var(--panel), #111827);
+  border: 1px solid #334155;
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 6px 20px #00000055;
+}
+
+input, button {
+  width: 100%;
+  margin: 6px 0;
+  border-radius: 10px;
+  border: 1px solid #475569;
+  padding: 10px 12px;
+  background: #0f172a;
+  color: white;
+}
+
+button {
+  background: linear-gradient(90deg, #0891b2, #0ea5e9);
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+button:hover { filter: brightness(1.05); }
+.row { display: flex; gap: 10px; }
+.hidden { display: none; }
+
+.track, .author {
+  border: 1px solid #475569;
+  border-radius: 10px;
+  padding: 10px;
+  margin-bottom: 10px;
+  background: #111827;
+}
+
+#playerToolbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #0f172a;
+  border-top: 1px solid #334155;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+}
+
+#audioPlayer { width: min(60vw, 600px); }
+
+#toast {
+  position: fixed;
+  right: 14px;
+  top: 80px;
+  background: #155e75;
+  border: 1px solid #67e8f9;
+  color: white;
+  padding: 10px 12px;
+  border-radius: 8px;
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: .2s ease;
+}
+
+#toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
