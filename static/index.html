@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SelfHosted Music — Вход</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header>
+    <h1>🎧 SelfHosted Music</h1>
+    <nav>
+      <a href="/index.html">Вход</a>
+      <a href="/tracks.html">Треки</a>
+      <a href="/authors.html">Авторы</a>
+      <a href="/upload.html">Загрузка</a>
+    </nav>
+  </header>
+
+  <main class="single-col">
+    <section class="card">
+      <h2>Авторизация</h2>
+      <input id="email" placeholder="Email" />
+      <input id="password" type="password" placeholder="Пароль" />
+      <input id="displayName" placeholder="Никнейм (для регистрации)" />
+      <div class="row">
+        <button onclick="register()">Регистрация</button>
+        <button onclick="login()">Войти</button>
+      </div>
+
+      <h3>Email-код</h3>
+      <input id="verifyCode" placeholder="Код подтверждения" />
+      <button onclick="verifyEmail()">Подтвердить Email</button>
+
+      <h3>Восстановление пароля</h3>
+      <button onclick="forgotPassword()">Запросить reset token</button>
+      <input id="resetToken" placeholder="Reset token" />
+      <input id="newPassword" type="password" placeholder="Новый пароль" />
+      <button onclick="resetPassword()">Сменить пароль</button>
+      <small>В dev-режиме токены/коды возвращаются в API.</small>
+    </section>
+  </main>
+
+  <div id="toast"></div>
+  <script src="/common.js"></script>
+  <script src="/auth.js"></script>
+</body>
+</html>
