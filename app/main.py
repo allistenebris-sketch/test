@@ -1,9 +1,10 @@
 from datetime import datetime, timedelta
+import mimetypes
 from pathlib import Path
 
-from fastapi import Depends, FastAPI, File, Form, HTTPException, Query, UploadFile
+from fastapi import Depends, FastAPI, File, Form, HTTPException, Header, Query, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, EmailStr
@@ -53,6 +54,10 @@ class LoginRequest(BaseModel):
 class VerifyRequest(BaseModel):
     email: EmailStr
     code: str
+
+
+class EmailRequest(BaseModel):
+    email: EmailStr
 
 
 class RequestReset(BaseModel):
@@ -127,6 +132,20 @@ def verify_email(payload: VerifyRequest, db: Session = Depends(get_db)):
     db.delete(code_entry)
     db.commit()
     return {"message": "Email verified"}
+
+
+@app.post("/api/auth/resend-code")
+def resend_verify_code(payload: EmailRequest, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == payload.email).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    if user.is_verified:
+        return {"message": "Email already verified"}
+
+    code = generate_code()
+    db.add(EmailCode(email=payload.email, code=code, purpose="verify"))
+    db.commit()
+    return {"message": "New verification code sent", "debug_code": code}
 
 
 @app.post("/api/auth/login")
@@ -229,6 +248,7 @@ def list_tracks(db: Session = Depends(get_db), current_user: User = Depends(get_
 def stream_track(
     track_id: int,
     token: str | None = Query(default=None),
+    range_header: str | None = Header(default=None, alias="Range"),
     credentials: HTTPAuthorizationCredentials | None = Depends(optional_auth_scheme),
     db: Session = Depends(get_db),
 ):
@@ -240,7 +260,47 @@ def stream_track(
     track = db.query(Track).filter(Track.id == track_id).first()
     if not track:
         raise HTTPException(status_code=404, detail="Track not found")
-    return FileResponse(track.file_path)
+    file_path = Path(track.file_path)
+    file_size = file_path.stat().st_size
+    media_type = mimetypes.guess_type(file_path.name)[0] or "application/octet-stream"
+
+    if not range_header:
+        response = FileResponse(file_path, media_type=media_type)
+        response.headers["Accept-Ranges"] = "bytes"
+        return response
+
+    try:
+        units, range_spec = range_header.split("=", 1)
+        if units != "bytes":
+            raise ValueError("Invalid range unit")
+        start_str, end_str = range_spec.split("-", 1)
+        start = int(start_str) if start_str else 0
+        end = int(end_str) if end_str else file_size - 1
+        if start > end or end >= file_size:
+            raise ValueError("Invalid range bounds")
+    except ValueError:
+        raise HTTPException(status_code=416, detail="Invalid Range header")
+
+    chunk_size = end - start + 1
+
+    def file_iterator():
+        with file_path.open("rb") as f:
+            f.seek(start)
+            remaining = chunk_size
+            while remaining > 0:
+                read_size = min(64 * 1024, remaining)
+                data = f.read(read_size)
+                if not data:
+                    break
+                remaining -= len(data)
+                yield data
+
+    headers = {
+        "Accept-Ranges": "bytes",
+        "Content-Range": f"bytes {start}-{end}/{file_size}",
+        "Content-Length": str(chunk_size),
+    }
+    return StreamingResponse(file_iterator(), status_code=206, media_type=media_type, headers=headers)
 
 
 @app.get("/api/authors")

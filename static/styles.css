@@ -130,7 +130,8 @@ button {
 #toast {
   position: fixed;
   right: 12px;
-  top: 78px;
+  top: 98px;
+  z-index: 9999;
   background: rgba(11, 78, 97, 0.95);
   border: 1px solid #67e8f9;
   color: white;

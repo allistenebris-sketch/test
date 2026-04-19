@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="ru">
-<head>
+  <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SLFox Music — Вход</title>
-  <link rel="stylesheet" href="/styles.css" />
+    <title>SLFox Music — Вход</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 </head>
 <body>
   <header>
@@ -30,13 +31,13 @@
 
       <h3>Email-код</h3>
       <input id="verifyCode" placeholder="Код подтверждения" />
-      <button onclick="verifyEmail()">Подтвердить Email</button>
+      <div class="row">
+        <button onclick="verifyEmail()">Подтвердить Email</button>
+        <button onclick="resendCode()">Запросить новый код</button>
+      </div>
 
       <h3>Восстановление пароля</h3>
-      <button onclick="forgotPassword()">Запросить reset token</button>
-      <input id="resetToken" placeholder="Reset token" />
-      <input id="newPassword" type="password" placeholder="Новый пароль" />
-      <button onclick="resetPassword()">Сменить пароль</button>
+      <button onclick="openPasswordWindow()">Открыть окно восстановления</button>
       <small>В dev-режиме токены/коды возвращаются в API.</small>
     </section>
   </main>
