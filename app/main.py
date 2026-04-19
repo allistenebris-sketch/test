@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session
 
 from .config import settings
 from .database import Base, engine, get_db
+from .mailer import send_password_reset_token, send_verification_code
 from .models import EmailCode, PasswordResetToken, Subscription, Track, User
 from .security import (
     create_access_token,
@@ -109,8 +110,15 @@ def register(payload: RegisterRequest, db: Session = Depends(get_db)):
     code = generate_code()
     db.add(EmailCode(email=payload.email, code=code, purpose="verify"))
     db.commit()
+    try:
+        send_verification_code(payload.email, code)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"SMTP send failed: {exc}") from exc
 
-    return {"message": "Registered. Verify email with code.", "debug_code": code}
+    response = {"message": "Registered. Verify email with code from email."}
+    if settings.debug_return_codes:
+        response["debug_code"] = code
+    return response
 
 
 @app.post("/api/auth/verify")
@@ -145,7 +153,15 @@ def resend_verify_code(payload: EmailRequest, db: Session = Depends(get_db)):
     code = generate_code()
     db.add(EmailCode(email=payload.email, code=code, purpose="verify"))
     db.commit()
-    return {"message": "New verification code sent", "debug_code": code}
+    try:
+        send_verification_code(payload.email, code)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"SMTP send failed: {exc}") from exc
+
+    response = {"message": "New verification code sent"}
+    if settings.debug_return_codes:
+        response["debug_code"] = code
+    return response
 
 
 @app.post("/api/auth/login")
@@ -176,7 +192,14 @@ def forgot_password(payload: RequestReset, db: Session = Depends(get_db)):
         )
         db.add(reset)
         db.commit()
-        return {"message": "Reset token generated", "debug_reset_token": token}
+        try:
+            send_password_reset_token(payload.email, token)
+        except Exception as exc:
+            raise HTTPException(status_code=500, detail=f"SMTP send failed: {exc}") from exc
+        response = {"message": "Reset token sent to email"}
+        if settings.debug_return_codes:
+            response["debug_reset_token"] = token
+        return response
     return {"message": "If email exists, reset instructions were sent"}
 
 

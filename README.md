@@ -22,9 +22,21 @@ uvicorn app.main:app --reload
 
 Откройте `http://127.0.0.1:8000`.
 
+## SMTP отправка кодов
+
+Для отправки verification/reset писем настройте `.env`:
+
+- `SMTP_ENABLED=true`
+- `SMTP_HOST`, `SMTP_PORT`
+- `SMTP_USERNAME`, `SMTP_PASSWORD`
+- `SMTP_FROM_EMAIL`
+- `SMTP_USE_TLS=true` (или `SMTP_USE_SSL=true`)
+
+Коды подтверждения и reset token будут отправляться на email через SMTP.
+
 ## Важно
 
-Сейчас email-коды и reset token отдаются в ответе API в debug-полях (для self-hosted разработки без SMTP). Для production замените на отправку почты через SMTP/API провайдера.
+По умолчанию `DEBUG_RETURN_CODES=true`, поэтому коды также возвращаются в debug-полях API для dev-режима. Для production установите `DEBUG_RETURN_CODES=false`.
 
 
 Пароли хешируются через PBKDF2-HMAC-SHA256 (без зависимости от passlib/bcrypt backend).

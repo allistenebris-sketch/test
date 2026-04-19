@@ -16,6 +16,17 @@ class Settings(BaseSettings):
     pbkdf2_iterations: int = 390000
     pbkdf2_salt_bytes: int = 16
 
+    smtp_enabled: bool = False
+    smtp_host: str = "localhost"
+    smtp_port: int = 587
+    smtp_username: str = ""
+    smtp_password: str = ""
+    smtp_from_email: str = "noreply@slfox-music.local"
+    smtp_use_tls: bool = True
+    smtp_use_ssl: bool = False
+
+    debug_return_codes: bool = True
+
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
 
