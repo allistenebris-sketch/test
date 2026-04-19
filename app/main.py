@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from pathlib import Path
 
-from fastapi import Depends, FastAPI, File, Form, HTTPException, UploadFile
+from fastapi import Depends, FastAPI, File, Form, HTTPException, Query, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -35,6 +35,7 @@ UPLOAD_DIR.mkdir(exist_ok=True)
 
 Base.metadata.create_all(bind=engine)
 auth_scheme = HTTPBearer()
+optional_auth_scheme = HTTPBearer(auto_error=False)
 
 
 class RegisterRequest(BaseModel):
@@ -70,6 +71,16 @@ def get_current_user(
     if not subject:
         raise HTTPException(status_code=401, detail="Invalid token")
 
+    user = db.query(User).filter(User.email == subject).first()
+    if not user:
+        raise HTTPException(status_code=401, detail="User not found")
+    return user
+
+
+def get_user_by_token(token: str, db: Session) -> User:
+    subject = decode_access_token(token)
+    if not subject:
+        raise HTTPException(status_code=401, detail="Invalid token")
     user = db.query(User).filter(User.email == subject).first()
     if not user:
         raise HTTPException(status_code=401, detail="User not found")
@@ -214,7 +225,17 @@ def list_tracks(db: Session = Depends(get_db), current_user: User = Depends(get_
 
 
 @app.get("/api/tracks/{track_id}/stream")
-def stream_track(track_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def stream_track(
+    track_id: int,
+    token: str | None = Query(default=None),
+    credentials: HTTPAuthorizationCredentials | None = Depends(optional_auth_scheme),
+    db: Session = Depends(get_db),
+):
+    raw_token = credentials.credentials if credentials else token
+    if not raw_token:
+        raise HTTPException(status_code=401, detail="Token required")
+    get_user_by_token(raw_token, db)
+
     track = db.query(Track).filter(Track.id == track_id).first()
     if not track:
         raise HTTPException(status_code=404, detail="Track not found")
