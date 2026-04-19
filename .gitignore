@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+music_service.db
+uploads/
+.venv/
+.env
