@@ -12,9 +12,10 @@ def test_auth_flow():
 
     client = TestClient(app)
 
+    long_password = "x" * 120
     register_payload = {
         "email": "user@example.com",
-        "password": "strong-password",
+        "password": long_password,
         "display_name": "User",
     }
     r = client.post('/api/auth/register', json=register_payload)
@@ -24,6 +25,6 @@ def test_auth_flow():
     r = client.post('/api/auth/verify', json={"email": register_payload['email'], "code": code})
     assert r.status_code == 200
 
-    r = client.post('/api/auth/login', json={"email": register_payload['email'], "password": register_payload['password']})
+    r = client.post('/api/auth/login', json={"email": register_payload['email'], "password": long_password})
     assert r.status_code == 200
     assert 'access_token' in r.json()
