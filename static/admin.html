@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SLFox Music — Админ панель</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+</head>
+<body>
+  <header>
+    <h1>🎧 SLFox Music</h1>
+    <nav>
+      <a href="/tracks.html">Треки</a>
+      <a href="/authors.html">Авторы</a>
+      <a href="/upload.html">Загрузка</a>
+      <a href="/admin.html" class="admin-only">Админ</a>
+      <a href="/index.html" onclick="logout()">Выход</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2>Статистика</h2>
+      <div id="overview"></div>
+    </section>
+
+    <section class="card" style="grid-column: 1 / -1;">
+      <h2>Пользователи и роли</h2>
+      <div id="usersAdmin"></div>
+    </section>
+  </main>
+
+  <div id="toast"></div>
+  <script src="/common.js"></script>
+  <script src="/admin.js"></script>
+</body>
+</html>
