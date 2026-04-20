@@ -110,6 +110,53 @@ button {
   background: rgba(15, 23, 42, 0.68);
 }
 
+.track.playing {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px rgba(53, 208, 255, 0.35);
+}
+
+.tracks-layout {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: 1.5fr 1fr;
+}
+
+.queue-panel {
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 12px;
+  padding: 12px;
+  background: rgba(15, 23, 42, 0.55);
+  max-height: 60vh;
+  overflow: auto;
+}
+
+#queueList {
+  display: grid;
+  gap: 8px;
+}
+
+.queue-item {
+  text-align: left;
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  background: rgba(15, 23, 42, 0.9);
+  padding: 10px;
+}
+
+.queue-item strong {
+  display: block;
+  font-size: 0.92rem;
+}
+
+.queue-item small {
+  color: var(--muted);
+}
+
+.queue-item.active {
+  border-color: var(--accent);
+  background: linear-gradient(110deg, rgba(53, 208, 255, 0.26), rgba(139, 92, 246, 0.26));
+}
+
 #playerToolbar {
   position: fixed;
   bottom: 0;
@@ -126,6 +173,29 @@ button {
 }
 
 #audioPlayer { width: min(62vw, 680px); }
+
+.player-meta {
+  display: grid;
+  gap: 2px;
+}
+
+.player-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.icon-btn {
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  padding: 0;
+  font-size: 1.05rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
 
 #toast {
   position: fixed;
@@ -145,6 +215,9 @@ button {
 #toast.show { opacity: 1; transform: translateY(0); }
 
 @media (max-width: 700px) {
+  .tracks-layout {
+    grid-template-columns: 1fr;
+  }
   header { flex-direction: column; align-items: stretch; }
   nav { justify-content: flex-start; }
   .row { grid-template-columns: 1fr; }

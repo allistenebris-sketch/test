@@ -20,14 +20,30 @@
 
   <main class="single-col">
     <section class="card">
-      <h2>Лента треков</h2>
-      <div id="tracks"></div>
+      <div class="tracks-layout">
+        <div>
+          <h2>Лента треков</h2>
+          <div id="tracks"></div>
+        </div>
+        <aside class="queue-panel">
+          <h3>Очередь воспроизведения</h3>
+          <div id="queueList"></div>
+        </aside>
+      </div>
     </section>
   </main>
 
   <div id="playerToolbar">
-    <div><strong id="playingNow">Ничего не играет</strong></div>
-    <audio id="audioPlayer" controls></audio>
+    <div class="player-meta">
+      <strong id="playingNow">Ничего не играет</strong>
+      <small id="playingHint">Выберите трек из ленты или очереди</small>
+    </div>
+    <div class="player-controls">
+      <button id="prevBtn" class="icon-btn" title="Предыдущий">⏮</button>
+      <button id="playPauseBtn" class="icon-btn" title="Пауза/Пуск">⏯</button>
+      <button id="nextBtn" class="icon-btn" title="Следующий">⏭</button>
+    </div>
+    <audio id="audioPlayer" controls preload="metadata"></audio>
   </div>
 
   <div id="toast"></div>
