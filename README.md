@@ -49,7 +49,8 @@ uvicorn app.main:app --reload
 
 Для домена `music.tenebraefox.xyz` добавлены готовые шаблоны:
 
-- Nginx: `deploy/nginx/music.tenebraefox.xyz.conf`
+- Nginx bootstrap (без SSL): `deploy/nginx/music.tenebraefox.xyz.conf`
+- Nginx SSL (после certbot): `deploy/nginx/music.tenebraefox.xyz.ssl.conf`
 - systemd: `deploy/systemd/slfox-music.service`
 - prod env: `deploy/.env.production.example`
 
@@ -61,12 +62,19 @@ uvicorn app.main:app --reload
 4. Скопируйте systemd unit:
    - `sudo cp deploy/systemd/slfox-music.service /etc/systemd/system/`
    - `sudo systemctl daemon-reload && sudo systemctl enable --now slfox-music`
-5. Скопируйте Nginx конфиг:
+5. Скопируйте bootstrap Nginx конфиг (без ssl_certificate):
    - `sudo cp deploy/nginx/music.tenebraefox.xyz.conf /etc/nginx/sites-available/`
    - `sudo ln -s /etc/nginx/sites-available/music.tenebraefox.xyz.conf /etc/nginx/sites-enabled/`
    - `sudo nginx -t && sudo systemctl reload nginx`
-6. Выпустите сертификат Let's Encrypt:
+6. Выпустите сертификат Let's Encrypt (теперь nginx -t не падает, т.к. bootstrap конфиг не требует сертификатов):
    - `sudo apt install certbot python3-certbot-nginx`
    - `sudo certbot --nginx -d music.tenebraefox.xyz`
+7. После успешной выдачи сертификата переключите конфиг на SSL-версию:
+   - `sudo cp deploy/nginx/music.tenebraefox.xyz.ssl.conf /etc/nginx/sites-available/music.tenebraefox.xyz.conf`
+   - `sudo nginx -t && sudo systemctl reload nginx`
 
 После этого сервис будет доступен по `https://music.tenebraefox.xyz`.
+
+### Примечание по SQLite
+
+Если в `DATABASE_URL` используется путь вроде `sqlite:////opt/slfox-music/data/music_service.db`, приложение автоматически создаст директорию `data/`, чтобы избежать ошибки `sqlite3.OperationalError: unable to open database file`.
