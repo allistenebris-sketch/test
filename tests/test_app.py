@@ -28,3 +28,4 @@ def test_auth_flow():
     r = client.post('/api/auth/login', json={"email": register_payload['email'], "password": long_password})
     assert r.status_code == 200
     assert 'access_token' in r.json()
+    assert r.json()['user']['role'] in {'user', 'admin'}

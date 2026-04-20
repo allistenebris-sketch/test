@@ -13,7 +13,7 @@ from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import Session
 
 from .config import settings
-from .database import Base, engine, get_db
+from .database import Base, SessionLocal, engine, get_db
 from .mailer import send_password_reset_token, send_verification_code
 from .models import EmailCode, PasswordResetToken, Subscription, Track, User
 from .security import (
@@ -46,6 +46,22 @@ auth_scheme = HTTPBearer()
 optional_auth_scheme = HTTPBearer(auto_error=False)
 
 
+def ensure_admin_role() -> None:
+    if not settings.admin_email:
+        return
+    db = SessionLocal()
+    try:
+        admin_user = db.query(User).filter(User.email == settings.admin_email).first()
+        if admin_user and admin_user.role != "admin":
+            admin_user.role = "admin"
+            db.commit()
+    finally:
+        db.close()
+
+
+ensure_admin_role()
+
+
 class RegisterRequest(BaseModel):
     email: EmailStr
     password: str
@@ -75,6 +91,10 @@ class ConfirmReset(BaseModel):
     new_password: str
 
 
+class RoleUpdateRequest(BaseModel):
+    role: str
+
+
 def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(auth_scheme),
     db: Session = Depends(get_db),
@@ -87,6 +107,12 @@ def get_current_user(
     if not user:
         raise HTTPException(status_code=401, detail="User not found")
     return user
+
+
+def get_current_admin(current_user: User = Depends(get_current_user)) -> User:
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    return current_user
 
 
 def get_user_by_token(token: str, db: Session) -> User:
@@ -108,6 +134,7 @@ def register(payload: RegisterRequest, db: Session = Depends(get_db)):
         email=payload.email,
         password_hash=hash_password(payload.password),
         display_name=payload.display_name,
+        role="admin" if payload.email == settings.admin_email else "user",
         is_verified=False,
     )
     db.add(user)
@@ -181,7 +208,7 @@ def login(payload: LoginRequest, db: Session = Depends(get_db)):
     return {
         "access_token": token,
         "token_type": "bearer",
-        "user": {"id": user.id, "email": user.email, "display_name": user.display_name},
+        "user": {"id": user.id, "email": user.email, "display_name": user.display_name, "role": user.role},
     }
 
 
@@ -226,12 +253,78 @@ def reset_password(payload: ConfirmReset, db: Session = Depends(get_db)):
 
 @app.get("/api/me")
 def me(current_user: User = Depends(get_current_user)):
-    return {"id": current_user.id, "email": current_user.email, "display_name": current_user.display_name}
+    return {
+        "id": current_user.id,
+        "email": current_user.email,
+        "display_name": current_user.display_name,
+        "role": current_user.role,
+    }
 
 
 @app.get("/api/health")
 def health():
     return {"status": "ok", "service": settings.app_name}
+
+
+@app.get("/api/admin/overview")
+def admin_overview(db: Session = Depends(get_db), _: User = Depends(get_current_admin)):
+    return {
+        "users_count": db.query(User).count(),
+        "tracks_count": db.query(Track).count(),
+        "subscriptions_count": db.query(Subscription).count(),
+    }
+
+
+@app.get("/api/admin/users")
+def admin_users(db: Session = Depends(get_db), _: User = Depends(get_current_admin)):
+    users = db.query(User).order_by(User.created_at.desc()).all()
+    return [
+        {
+            "id": u.id,
+            "email": u.email,
+            "display_name": u.display_name,
+            "role": u.role,
+            "is_verified": u.is_verified,
+            "created_at": u.created_at,
+        }
+        for u in users
+    ]
+
+
+@app.post("/api/admin/users/{user_id}/role")
+def admin_update_user_role(
+    user_id: int,
+    payload: RoleUpdateRequest,
+    db: Session = Depends(get_db),
+    admin: User = Depends(get_current_admin),
+):
+    if payload.role not in {"user", "admin"}:
+        raise HTTPException(status_code=400, detail="Role must be 'user' or 'admin'")
+
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    if user.id == admin.id and payload.role != "admin":
+        raise HTTPException(status_code=400, detail="Cannot remove admin role from yourself")
+
+    user.role = payload.role
+    db.commit()
+    return {"message": "Role updated"}
+
+
+@app.delete("/api/admin/tracks/{track_id}")
+def admin_delete_track(track_id: int, db: Session = Depends(get_db), _: User = Depends(get_current_admin)):
+    track = db.query(Track).filter(Track.id == track_id).first()
+    if not track:
+        raise HTTPException(status_code=404, detail="Track not found")
+
+    path = Path(track.file_path)
+    if path.exists():
+        path.unlink()
+
+    db.delete(track)
+    db.commit()
+    return {"message": "Track deleted"}
 
 
 @app.post("/api/tracks")

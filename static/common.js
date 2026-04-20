@@ -8,7 +8,12 @@ const toast = (msg) => {
 
 const getToken = () => localStorage.getItem('token');
 const setToken = (token) => localStorage.setItem('token', token);
-const logout = () => localStorage.removeItem('token');
+const getRole = () => localStorage.getItem('role') || 'user';
+const setRole = (role) => localStorage.setItem('role', role || 'user');
+const logout = () => {
+  localStorage.removeItem('token');
+  localStorage.removeItem('role');
+};
 
 const authHeaders = () => {
   const token = getToken();
@@ -31,3 +36,12 @@ function requireAuth() {
     window.location.href = '/index.html';
   }
 }
+
+function applyRoleVisibility() {
+  const isAdmin = getRole() === 'admin';
+  document.querySelectorAll('.admin-only').forEach((el) => {
+    el.style.display = isAdmin ? '' : 'none';
+  });
+}
+
+document.addEventListener('DOMContentLoaded', applyRoleVisibility);

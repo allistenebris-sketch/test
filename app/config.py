@@ -28,6 +28,7 @@ class Settings(BaseSettings):
     smtp_use_ssl: bool = False
 
     debug_return_codes: bool = True
+    admin_email: str = "admin@slfox.local"
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 

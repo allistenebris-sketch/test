@@ -55,6 +55,7 @@ async function login() {
       }),
     });
     setToken(data.access_token);
+    setRole(data.user.role);
     window.location.href = '/tracks.html';
   } catch (e) {
     toast(e.message);

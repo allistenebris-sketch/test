@@ -57,6 +57,8 @@ nav a {
   background: rgba(15, 23, 42, 0.6);
 }
 
+.admin-only { display: none; }
+
 main {
   max-width: 1120px;
   margin: 18px auto;

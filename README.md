@@ -8,6 +8,7 @@
 - подписка на авторов;
 - многостраничный web-интерфейс (`/index.html`, `/tracks.html`, `/authors.html`, `/upload.html`) с плеером и нижним тулбаром.
 - современное меню переключения треков: очередь, предыдущий/следующий, play/pause и автопереход.
+- роли пользователей (`user` / `admin`) и отдельная админ-панель (`/admin.html`).
 - отдельное popup-окно восстановления пароля (`/password-reset.html`) и возможность запросить новый email-код.
 - современный адаптивный UI в стиле glassmorphism.
 
@@ -38,6 +39,8 @@ uvicorn app.main:app --reload
 ## Важно
 
 По умолчанию `DEBUG_RETURN_CODES=true`, поэтому коды также возвращаются в debug-полях API для dev-режима. Для production установите `DEBUG_RETURN_CODES=false`.
+
+Пользователь с email из `ADMIN_EMAIL` автоматически получает роль `admin`.
 
 
 Пароли хешируются через PBKDF2-HMAC-SHA256 (без зависимости от passlib/bcrypt backend).
