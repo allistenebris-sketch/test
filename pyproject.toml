@@ -1,0 +1,8 @@
+[project]
+name = "foxduplicatefinder"
+version = "0.1.0"
+description = "Duplicate finder for photos and videos (Windows GUI + CLI)"
+requires-python = ">=3.12"
+
+[project.scripts]
+foxdup = "foxduplicatefinder.cli.main:main"
